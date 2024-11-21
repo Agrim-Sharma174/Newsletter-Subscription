@@ -1,5 +1,5 @@
-import React from 'react';
-import { Card, Divider } from '@nextui-org/react';
+import React from "react";
+import { Card, Divider } from "@nextui-org/react";
 
 interface SimulationLogsProps {
   logs: string[];

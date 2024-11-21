@@ -1,11 +1,13 @@
-import React from 'react';
-import { BiCheckCircle, BiXCircle } from 'react-icons/bi';
+import React from "react";
+import { BiCheckCircle, BiXCircle } from "react-icons/bi";
 
 interface SimulationStatusProps {
   flowState: string;
 }
 
-export const SimulationStatus: React.FC<SimulationStatusProps> = ({ flowState }) => {
+export const SimulationStatus: React.FC<SimulationStatusProps> = ({
+  flowState,
+}) => {
   if (flowState === "completed") {
     return (
       <div className="flex flex-col justify-center items-center text-green-500">

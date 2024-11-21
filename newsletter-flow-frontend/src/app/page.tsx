@@ -7,6 +7,7 @@ import { SimulationButton } from "@/components/SimulationButton";
 import { SimulationLogs } from "@/components/SimulationLogs";
 import { SimulationStatus } from "@/components/SimulationStatus";
 import Confetti from "react-confetti";
+import EmailPosition from "@/components/EmailPosition";
 
 export default function NewsletterRenewalSimulation() {
   // State management for the simulation flow
@@ -18,6 +19,7 @@ export default function NewsletterRenewalSimulation() {
   const [currentStep, setCurrentStep] = useState(0);
   // Keeps track of which steps should be visible during the simulation
   const [visibleSteps, setVisibleSteps] = useState<number[]>([]);
+  // for confetti- (celebration)
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
   // Define the steps in the newsletter renewal simulation process
@@ -138,6 +140,7 @@ export default function NewsletterRenewalSimulation() {
   return (
     // Full-screen container with gradient background
     <div className="min-h-screen bg-gradient-to-br from-purple-400 to-indigo-600 p-8 flex items-center justify-center">
+      <EmailPosition />
 
       {/* Confetti effect when simulation is completed */}
       {flowState === "completed" && (

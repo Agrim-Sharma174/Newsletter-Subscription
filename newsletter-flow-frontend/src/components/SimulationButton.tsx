@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button } from '@nextui-org/react';
+import React from "react";
+import { Button } from "@nextui-org/react";
 
 interface SimulationButtonProps {
   flowState: string;
@@ -8,7 +8,7 @@ interface SimulationButtonProps {
 
 export const SimulationButton: React.FC<SimulationButtonProps> = ({
   flowState,
-  onSimulateFlow
+  onSimulateFlow,
 }) => {
   return (
     <div className="w-full flex justify-center items-center">
@@ -24,7 +24,7 @@ export const SimulationButton: React.FC<SimulationButtonProps> = ({
           : flowState === "running"
           ? "Simulating..."
           : flowState === "completed"
-          ? "Simulation Complete"
+          ? "Start Flow"
           : "Retry Simulation"}
       </Button>
     </div>
