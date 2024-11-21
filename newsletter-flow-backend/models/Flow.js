@@ -32,17 +32,16 @@ const FlowSchema = new mongoose.Schema({
 });
 
 // Validate before saving
-FlowSchema.pre('save', function(next) {
+FlowSchema.pre('save', function (next) {
   if (this.reminderCount > 2) {
     this.status = 'Not Renewed';
   }
   next();
 });
 
-// Static method to find or create flow
-FlowSchema.statics.findOrCreateFlow = async function(userId) {
+FlowSchema.statics.findOrCreateFlow = async function (userId) {
   let flow = await this.findOne({ userId, status: 'Pending' });
-  
+
   if (!flow) {
     flow = new this({
       userId,
@@ -51,7 +50,7 @@ FlowSchema.statics.findOrCreateFlow = async function(userId) {
     });
     await flow.save();
   }
-  
+
   return flow;
 };
 

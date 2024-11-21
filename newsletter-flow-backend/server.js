@@ -4,6 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const flowRoutes = require('./routes/flowRoutes');
 const path = require('path');
+const connectToDatabase = require('./config/dbConnection');
 require('dotenv').config();
 
 const app = express();
@@ -13,19 +14,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Improved MongoDB Connection
-const dbURI = process.env.MONGODB_URI;
-
-mongoose.connect(dbURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('MongoDB connected successfully');
-})
-.catch((err) => {
-  console.error('MongoDB connection error:', err);
-});
+// Connect to database
+connectToDatabase();
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -39,7 +29,7 @@ app.use('/api/flows', flowRoutes);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).send('something broke, oops!');
 });
 
 const PORT = process.env.PORT || 5000;
