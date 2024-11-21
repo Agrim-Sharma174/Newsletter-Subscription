@@ -24,7 +24,13 @@ export default function NewsletterRenewalSimulation() {
     setLogs((prevLogs) => [...prevLogs, `${timestamp} - ${message}`]);
   };
 
+  const generateRandomUserId = () => {
+    return "user" + Math.floor(Math.random() * 1000000); // Random user ID
+  };
+
   const simulateFlow = async () => {
+    const randomUserId = generateRandomUserId();
+    addLog(`Starting simulation for user ${randomUserId}`);
     setFlowState("running");
     setCurrentStep(0);
     setLogs([]);
@@ -32,7 +38,7 @@ export default function NewsletterRenewalSimulation() {
     const response = await fetch("/api/flows/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: "user123" }),
+      body: JSON.stringify({ userId: randomUserId }),
     });
 
     if (!response.ok) {
@@ -49,19 +55,21 @@ export default function NewsletterRenewalSimulation() {
       addLog(steps[i].name);
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
-      if (i === 2 || i === 5) {
+      try {
         const simulateResponse = await fetch("/api/flows/simulate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ flowId }),
         });
-
+    
         if (!simulateResponse.ok) {
+          const errorText = await simulateResponse.text();
+          console.error('Detailed error:', errorText);
           addLog("Simulation failed");
           setFlowState("error");
           return;
         }
-
+    
         const result = await simulateResponse.json();
         addLog(`Simulation result: ${result.status}`);
 
@@ -77,6 +85,10 @@ export default function NewsletterRenewalSimulation() {
           setFlowState("completed");
           return;
         }
+      } catch (error) {
+        console.error('Network or parsing error:', error);
+        addLog("Simulation failed");
+        setFlowState("error");
       }
     }
   };

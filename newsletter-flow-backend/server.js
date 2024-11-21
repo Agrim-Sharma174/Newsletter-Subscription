@@ -4,6 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const flowRoutes = require('./routes/flowRoutes');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 
