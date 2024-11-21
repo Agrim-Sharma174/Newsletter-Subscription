@@ -1,6 +1,12 @@
 const Flow = require('../models/Flow');
 const mongoose = require('mongoose');
 
+// wait times
+const WAIT_TIMES = {
+  firstReminderWait: 3000, // 3 seconds
+  secondReminderWait: 2000, // 2 seconds
+};
+
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 class FlowController {
@@ -18,7 +24,7 @@ class FlowController {
       res.status(200).json({
         flowId: flow._id,
         status: flow.status,
-        logs: flow.logs
+        logs: flow.logs,
       });
     } catch (err) {
       console.error('Start Flow Error:', err);
@@ -39,7 +45,7 @@ class FlowController {
     if (!mongoose.Types.ObjectId.isValid(flowId)) {
       return res.status(400).json({
         error: 'Invalid Flow ID format',
-        details: 'The provided Flow ID is not a valid MongoDB ObjectId'
+        details: 'The provided Flow ID is not a valid MongoDB ObjectId',
       });
     }
 
@@ -51,7 +57,7 @@ class FlowController {
       if (!flow) {
         return res.status(404).json({
           error: 'Flow not found',
-          details: `No flow exists with ID: ${flowId}`
+          details: `No flow exists with ID: ${flowId}`,
         });
       }
 
@@ -71,7 +77,7 @@ class FlowController {
       flow.reminderCount++;
       await flow.save();
 
-      await wait(3000); // Simulated wait
+      await wait(WAIT_TIMES.firstReminderWait);
 
       // Randomly decide if subscription is renewed after first reminder- there's 50% chance of renewal & not renewal
       const renewedAfterFirst = Math.random() > 0.5;
@@ -88,7 +94,7 @@ class FlowController {
       flow.reminderCount++;
       await flow.save();
 
-      await wait(2000); // Simulated wait
+      await wait(WAIT_TIMES.secondReminderWait);
 
       // Randomly decide if subscription is renewed after second reminder, again 50% chance of renewal & not renewal
       const renewedAfterSecond = Math.random() > 0.5;
@@ -108,7 +114,7 @@ class FlowController {
       console.error('Simulate Flow Error:', err);
       res.status(500).json({
         error: 'Internal server error',
-        details: err.message
+        details: err.message,
       });
     }
   }
@@ -119,12 +125,12 @@ class FlowController {
       const flows = await Flow.find({});
       res.status(200).json({
         totalFlows: flows.length,
-        flows: flows.map(flow => ({
+        flows: flows.map((flow) => ({
           id: flow._id,
           userId: flow.userId,
           status: flow.status,
-          createdAt: flow.createdAt
-        }))
+          createdAt: flow.createdAt,
+        })),
       });
     } catch (err) {
       console.error('List Flows Error:', err);
