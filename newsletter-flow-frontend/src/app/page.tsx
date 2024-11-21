@@ -1,15 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, Button, Divider, Progress, Spacer } from "@nextui-org/react";
-import { BiCheckCircle, BiXCircle } from "react-icons/bi";
-import { BsArrowRight, BsClock } from "react-icons/bs";
+import { useEffect, useState } from "react";
+import { Card, Divider, Progress, Spacer } from "@nextui-org/react";
+import { StepProgressBar } from "@/components/StepProgressBar";
+import { SimulationButton } from "@/components/SimulationButton";
+import { SimulationLogs } from "@/components/SimulationLogs";
+import { SimulationStatus } from "@/components/SimulationStatus";
+import Confetti from "react-confetti";
 
 export default function NewsletterRenewalSimulation() {
+  // State management for the simulation flow
+  // flowState tracks the current state of the simulation (idle, running, completed, error)
   const [flowState, setFlowState] = useState("idle");
+  // Logs array to store simulation events and messages
   const [logs, setLogs] = useState<string[]>([]);
+  // Tracks the current step in the simulation process
   const [currentStep, setCurrentStep] = useState(0);
+  // Keeps track of which steps should be visible during the simulation
+  const [visibleSteps, setVisibleSteps] = useState<number[]>([]);
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
+  // Define the steps in the newsletter renewal simulation process
   const steps = [
     { id: 1, name: "Send Reminder" },
     { id: 2, name: "Wait 3 Days" },
@@ -19,167 +30,166 @@ export default function NewsletterRenewalSimulation() {
     { id: 6, name: "Final Check" },
   ];
 
+  // Helper function to add timestamped logs to the simulation
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs((prevLogs) => [...prevLogs, `${timestamp} - ${message}`]);
   };
 
+  // Generate a random user ID for simulation purposes
   const generateRandomUserId = () => {
-    return "user" + Math.floor(Math.random() * 1000000); // Random user ID
+    return "user" + Math.floor(Math.random() * 1000000);
   };
 
+  // Main simulation flow function
   const simulateFlow = async () => {
+    // Generate a random user ID for this simulation
     const randomUserId = generateRandomUserId();
+
+    // Initialize simulation state
     addLog(`Starting simulation for user ${randomUserId}`);
     setFlowState("running");
     setCurrentStep(0);
     setLogs([]);
+    setVisibleSteps([]);
 
+    // Start the flow by calling the backend API
     const response = await fetch("/api/flows/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: randomUserId }),
     });
 
+    // Handle flow start failure
     if (!response.ok) {
       addLog("Failed to start the flow");
       setFlowState("error");
       return;
     }
 
+    // Extract flow ID from the response
     const { flowId } = await response.json();
     addLog("Flow started successfully");
 
+    // Iterate through each step of the simulation
     for (let i = 0; i < steps.length; i++) {
+      // Update current step and visible steps
       setCurrentStep(i);
+      setVisibleSteps((prev) => [...prev, i]);
       addLog(steps[i].name);
+
+      // Simulate waiting period between steps
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       try {
+        // Simulate the current step by calling backend API
         const simulateResponse = await fetch("/api/flows/simulate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ flowId }),
         });
-    
+
+        // Handle simulation step failure
         if (!simulateResponse.ok) {
           const errorText = await simulateResponse.text();
-          console.error('Detailed error:', errorText);
+          console.error("Detailed error:", errorText);
           addLog("Simulation failed");
           setFlowState("error");
           return;
         }
-    
+
+        // Process simulation result
         const result = await simulateResponse.json();
         addLog(`Simulation result: ${result.status}`);
 
+        // If renewed, complete the flow
         if (result.status === "Renewed") {
           addLog("Thank you email sent");
           setFlowState("completed");
-          setCurrentStep(steps.length); // Set to the last step to show full progress
+          setCurrentStep(steps.length);
+          setVisibleSteps((prev) => [...prev, steps.length - 1]);
           return;
         }
 
-        if (i === 5) {
+        // If final step is reached without renewal
+        if (i === steps.length - 1) {
           addLog("No further action taken");
           setFlowState("completed");
           return;
         }
       } catch (error) {
-        console.error('Network or parsing error:', error);
+        // Handle any network or parsing errors
+        console.error("Network or parsing error:", error);
         addLog("Simulation failed");
         setFlowState("error");
       }
     }
   };
 
+  // confetti effect
+  useEffect(() => {
+    const handleResize = () =>
+      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
+    // Full-screen container with gradient background
     <div className="min-h-screen bg-gradient-to-br from-purple-400 to-indigo-600 p-8 flex items-center justify-center">
+
+      {/* Confetti effect when simulation is completed */}
+      {flowState === "completed" && (
+        <Confetti width={windowSize.width} height={windowSize.height} />
+      )}
+      {/* Main card container */}
       <Card className="max-w-4xl w-full bg-white shadow-xl rounded-xl overflow-hidden">
         <div className="p-8">
-          <h3 className="text-3xl font-bold text-indigo-700 mb-2">Newsletter Renewal Simulation</h3>
-          <p className="text-gray-600 mb-6">Simulate the process of renewing a newsletter subscription.</p>
+          {/* Title and description */}
+          <h3 className="text-3xl font-bold text-indigo-700 mb-2 flex justify-center">
+            Newsletter Renewal
+          </h3>
+          <p className="text-gray-600 mb-6 flex justify-center">
+            Simulate the process of renewing a newsletter subscription.
+          </p>
 
           <Divider className="my-6" />
 
-          <div className="flex flex-col items-center justify-center mb-8">
-            <div className="w-full flex justify-between mb-4">
-              {steps.map((step, index) => (
-                <div key={step.id} className="text-center">
-                  <div
-                    className={`flex items-center justify-center w-12 h-12 rounded-full text-white text-lg font-semibold ${
-                      index < currentStep || flowState === "completed"
-                        ? "bg-green-500"
-                        : index === currentStep
-                        ? "bg-indigo-500"
-                        : "bg-gray-300"
-                    }`}
-                  >
-                    {index < currentStep || flowState === "completed" ? (
-                      <BiCheckCircle size={24} />
-                    ) : index === currentStep ? (
-                      <BsClock size={24} />
-                    ) : (
-                      step.id
-                    )}
-                  </div>
-                  <p className="text-xs mt-2 text-gray-600">{step.name}</p>
-                </div>
-              ))}
-            </div>
+          {/* Step Progress Bar */}
+          <StepProgressBar
+            steps={steps}
+            currentStep={currentStep}
+            visibleSteps={visibleSteps}
+            flowState={flowState}
+          />
 
-            <Progress
-              value={((currentStep + 1) / steps.length) * 100}
-              color={flowState === "running" ? "primary" : flowState === "completed" ? "success" : "danger"}
-              className="w-full h-2"
-            />
-          </div>
-
-          <div className="w-full flex justify-center items-center">
-            <Button
-              onPress={simulateFlow}
-              disabled={flowState === "running"}
-              color="default"
-              size="lg"
-              className="flex justify-center mb-8 text-black border border-purple-600 w-fit px-8 py-4 rounded-lg hover:bg-purple-600 hover:text-white"
-            >
-              {flowState === "idle"
-                ? "Start Simulation"
-                : flowState === "running"
-                ? "Simulating..."
+          {/* Overall Progress Indicator */}
+          <Progress
+            value={((currentStep + 1) / steps.length) * 100}
+            color={
+              flowState === "running"
+                ? "primary"
                 : flowState === "completed"
-                ? "Simulation Complete"
-                : "Retry Simulation"}
-            </Button>
-          </div>
+                ? "success"
+                : "danger"
+            }
+            className="w-full h-2"
+          />
 
-          <Card className="bg-gray-50 p-6 rounded-lg shadow-inner">
-            <h4 className="text-xl font-semibold text-indigo-700 mb-4">Simulation Log</h4>
-            <Divider className="mb-4" />
-            <div className="max-h-60 overflow-y-auto">
-              {logs.map((log, index) => (
-                <p key={index} className="text-sm text-gray-600 mb-2">
-                  {log}
-                </p>
-              ))}
-            </div>
-          </Card>
+          {/* Simulation Control Button */}
+          <SimulationButton
+            flowState={flowState}
+            onSimulateFlow={simulateFlow}
+          />
+
+          {/* Simulation Logs Display */}
+          <SimulationLogs logs={logs} />
 
           <Spacer y={4} />
 
-          {flowState === "completed" && (
-            <div className="flex justify-center items-center text-green-500">
-              <BiCheckCircle size={24} />
-              <p className="ml-2 text-lg font-semibold">Simulation completed successfully</p>
-            </div>
-          )}
-
-          {flowState === "error" && (
-            <div className="flex justify-center items-center text-red-500">
-              <BiXCircle size={24} />
-              <p className="ml-2 text-lg font-semibold">An error occurred during simulation</p>
-            </div>
-          )}
+          {/* Simulation Status Indicator */}
+          <SimulationStatus flowState={flowState} />
         </div>
       </Card>
     </div>

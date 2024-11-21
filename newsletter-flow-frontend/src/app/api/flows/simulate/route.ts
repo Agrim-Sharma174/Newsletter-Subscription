@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   const { flowId } = body
 
   try {
-    const response = await fetch('http://localhost:5000/api/flows/simulate', {
+    const response = await fetch('https://newsletter-subscription-email-agrim.onrender.com/api/flows/simulate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

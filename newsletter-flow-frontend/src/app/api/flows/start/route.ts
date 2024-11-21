@@ -5,7 +5,7 @@ export async function POST(request: Request) {
   const { userId } = body
 
   try {
-    const response = await fetch('http://localhost:5000/api/flows/start', {
+    const response = await fetch('https://newsletter-subscription-email-agrim.onrender.com/api/flows/start', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -24,4 +24,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
-
