@@ -2,13 +2,13 @@
 
 A simulation of a newsletter subscription renewal process with a modern UI, built using Next.js, Express, Nodejs, and MongoDB.
 
-## 🌐 Live Demo
+## Live Demo
 
 - Deployed link: [https://newsletter-subscription-email-agrim.vercel.app/](https://newsletter-subscription-email-agrim.vercel.app/)
 - Backend deployed link: [https://newsletter-subscription-email-agrim.onrender.com](https://newsletter-subscription-email-agrim.onrender.com)
 - Video Demo: [Watch on YouTube](https://youtu.be/6G1hYqUzJTg)
 
-## 🔄 Flow Process
+## Flow Process
 
 - User initiates flow simulation
 - System sends first reminder email
@@ -20,14 +20,18 @@ A simulation of a newsletter subscription renewal process with a modern UI, buil
   - Final status check
 - Flow completes with either renewal thank you message or no further action
 
-## ✍️ My Solution and assumptions
+## My Solution and assumptions
 
-- I started with buidling the backend, making it robust with respect to every requirement
-- While backend testing, I checked every case which can happen
-- Built the frontend, used UI library and animations to show the progress bar
+- I started with building the backend, making it robust with respect to every requirement
+- Made the controllers for flow of the email, built 2 APIs, one to start and the other one to simulate the renewal process
+- When starting, the data is stored in database, when the user clicks start, the renewed status is changed causing the simulation to start
+- 50-50 chance of renew and non-renew, it will cause 2 results- thank you at the 2nd step or more tries
+- While backend testing, I checked every case that could happen
+- Built the frontend, used UI library and animations to show the progress bar, and used the 2 APIs, to start and simulate
+- Every time a user clicks start flow, a new user is created, this was done to view the simulation, as it might cause some users to show already finished
 - Beautify the UI
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - Next.js 13+ (React Framework)
@@ -44,7 +48,7 @@ A simulation of a newsletter subscription renewal process with a modern UI, buil
 - Mongoose (ODM)
 - Cors (Cross-Origin Resource Sharing)
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 1. Clone the repository
 ```bash
@@ -76,13 +80,13 @@ PORT=5000
 npm start
 ```
 
-## 📝 API Endpoints
+## API Endpoints
 
 - `POST /api/flows/start` - Start a new flow
 - `POST /api/flows/simulate` - Simulate flow progression
 - `GET /api/flows/list` - List all flows (testing only)
 
-## 💡 Implementation Details
+## Implementation Details
 
 - The flow simulation uses random number generation to determine renewal status
 - Waiting periods are simulated using timeouts
@@ -90,7 +94,7 @@ npm start
 - User IDs are randomly generated for each simulation
 - The UI updates in real-time as the flow progresses
 
-## 🎨 UI Components
+## UI Components
 
 - **StepProgressBar**: Visualizes the current stage of the flow
 - **SimulationButton**: Controls flow simulation
